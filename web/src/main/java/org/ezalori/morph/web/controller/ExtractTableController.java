@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/table")
 @RequiredArgsConstructor
-public class TableController {
+public class ExtractTableController {
   private final ExtractTableRepository tableRepo;
   private final ExtractTableService tableService;
 
