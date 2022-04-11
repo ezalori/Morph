@@ -1,12 +1,19 @@
 package org.ezalori.morph.web.controller;
 
+import java.util.Date;
 import java.util.Map;
 
+import javax.validation.Valid;
+
 import lombok.RequiredArgsConstructor;
+import org.ezalori.morph.web.form.ExtractTableForm;
 import org.ezalori.morph.web.model.ExtractTable;
 import org.ezalori.morph.web.repository.ExtractTableRepository;
 import org.ezalori.morph.web.service.ExtractTableService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Sort;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,12 +43,21 @@ public class TableController {
   }
 
   @PostMapping("/save")
-  public ApiResponse save(@ModelAttribute ExtractTable table) {
-    if (table.getId() != null) {
-      tableRepo.findById(table.getId()).orElseThrow(() -> new ApiException("id not found"));
+  public ApiResponse save(@Valid ExtractTableForm tableForm, BindingResult bindingResult) {
+    if (bindingResult.hasErrors()) {
+      throw new ApiException(bindingResult.toString());
     }
-    var tableId = tableService.saveTable(table);
-    return new ApiResponse(Map.of("id", tableId));
+
+    ExtractTable table;
+    if (tableForm.getId() != null) {
+      table = tableRepo.findById(tableForm.getId()).orElseThrow(() -> new ApiException("id not found"));
+    } else {
+      table = new ExtractTable();
+      table.setCreatedAt(new Date());
+    }
+    BeanUtils.copyProperties(tableForm, table);
+    tableRepo.save(table);
+    return new ApiResponse(Map.of("id", table.getId()));
   }
 
   @GetMapping("/columns")
