@@ -10,6 +10,7 @@ import org.ezalori.morph.web.form.DatabaseInstanceForm;
 import org.ezalori.morph.web.model.DatabaseInstance;
 import org.ezalori.morph.web.repository.DatabaseInstanceRepository;
 import org.ezalori.morph.web.repository.ExtractTableRepository;
+import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Sort;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,12 +32,6 @@ public class DatabaseInstanceController {
     return Map.of("dbList", dbList);
   }
 
-  @GetMapping("/get")
-  public Map<String, Object> getDb(@RequestParam("id") Integer id) {
-    var db = dbRepo.findById(id).orElseThrow(() -> new AppException("DB not found."));
-    return Map.of("db", db);
-  }
-
   @PostMapping("/save")
   public Map<String, Object> saveDb(@Valid DatabaseInstanceForm dbForm, BindingResult bindingResult) {
     if (bindingResult.hasErrors()) {
@@ -50,6 +45,12 @@ public class DatabaseInstanceController {
       db = new DatabaseInstance();
       db.setCreatedAt(new Date());
     }
+
+    if (!dbForm.getName().equals(db.getName()) && dbRepo.existsByName(dbForm.getName())) {
+      throw new AppException("DB name exists.");
+    }
+
+    BeanUtils.copyProperties(dbForm, db);
     dbRepo.save(db);
     return Map.of("id", db.getId());
   }
@@ -65,6 +66,6 @@ public class DatabaseInstanceController {
     }
 
     dbRepo.deleteById(id);
-    return Map.of("message", "ok");
+    return Map.of("id", id);
   }
 }

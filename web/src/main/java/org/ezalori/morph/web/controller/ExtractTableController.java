@@ -66,7 +66,7 @@ public class ExtractTableController {
       throw new AppException("Table ID not found.");
     }
     tableRepo.deleteById(id);
-    return Map.of("status", "ok");
+    return Map.of("id", id);
   }
 
   @GetMapping("/columns")
