@@ -1,3 +1,11 @@
+create table morph.user (
+  id int primary key auto_increment
+  ,username varchar(255) not null
+  ,password varchar(100) not null
+  ,created_at datetime not null
+  ,updated_at timestamp not null default current_timestamp on update current_timestamp
+);
+
 create table morph.extract_table (
   id int primary key auto_increment
   ,source_instance int not null
