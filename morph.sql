@@ -22,14 +22,11 @@ create table database_instance (
   ,updated_at timestamp not null default current_timestamp on update current_timestamp
 );
 
-create table users(
-	username varchar(50) not null primary key,
-	password varchar(500) not null,
-	enabled boolean not null
-);
-
-create table authorities (
-	username varchar(50) not null,
-	authority varchar(50) not null,
-	unique index ix_auth_username (username,authority)
+create table user (
+  id int not null primary key auto_increment
+  ,username varchar(255) not null
+  ,password varchar(255) not null
+  ,created_at datetime not null
+  ,updated_at timestamp not null default current_timestamp on update current_timestamp
+  ,unique key uk_username (username)
 );
