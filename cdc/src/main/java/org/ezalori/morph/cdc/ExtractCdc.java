@@ -1,5 +1,6 @@
 package org.ezalori.morph.cdc;
 
+import org.ezalori.morph.CdcApplication;
 import org.ezalori.morph.common.repository.ExtractTableRepository;
 
 public class ExtractCdc {
