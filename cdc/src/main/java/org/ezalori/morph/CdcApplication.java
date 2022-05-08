@@ -1,16 +1,47 @@
 package org.ezalori.morph;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import com.zaxxer.hikari.HikariDataSource;
+import javax.sql.DataSource;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.jdbc.repository.config.AbstractJdbcConfiguration;
+import org.springframework.data.jdbc.repository.config.EnableJdbcRepositories;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.transaction.TransactionManager;
 
-@SpringBootApplication
-public class CdcApplication {
+@ComponentScan
+@Configuration
+@EnableJdbcRepositories
+public class CdcApplication extends AbstractJdbcConfiguration {
   private static class Holder {
-    static final ApplicationContext INSTANCE = SpringApplication.run(CdcApplication.class);
+    static final ApplicationContext INSTANCE = new AnnotationConfigApplicationContext(CdcApplication.class);
   }
 
   public static ApplicationContext getInstance() {
     return Holder.INSTANCE;
+  }
+
+  @Bean
+  DataSource dataSource() {
+    var ds = new HikariDataSource();
+    ds.setJdbcUrl("jdbc:mysql://localhost:3306/morph"); // TODO Use config
+    ds.setUsername("root");
+    ds.setPassword("");
+    return ds;
+  }
+
+  @Bean
+  NamedParameterJdbcOperations namedParameterJdbcOperations(DataSource dataSource) {
+    return new NamedParameterJdbcTemplate(dataSource);
+  }
+
+  @Bean
+  TransactionManager transactionManager(DataSource dataSource) {
+    return new DataSourceTransactionManager(dataSource);
   }
 }
