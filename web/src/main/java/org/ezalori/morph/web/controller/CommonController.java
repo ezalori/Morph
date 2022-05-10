@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
  */
 @Controller
 public class CommonController {
-  @GetMapping("/ping")
+  @GetMapping(value = "/ping", produces = "text/plain")
   @ResponseBody
   public String ping() {
     return "pong";

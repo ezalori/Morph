@@ -4,6 +4,7 @@ import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import lombok.Value;
 import org.ezalori.morph.web.AppException;
 import org.ezalori.morph.web.form.LoginForm;
 import org.ezalori.morph.web.model.User;
@@ -20,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api")
 public class AuthController {
   @PostMapping("/login")
-  public Map<String, Object> login(@Valid LoginForm form, BindingResult bindingResult,
+  public CurrentUser login(@Valid LoginForm form, BindingResult bindingResult,
                                    HttpServletRequest request) {
     FormUtils.checkBindingErrors(bindingResult);
 
@@ -32,7 +33,7 @@ public class AuthController {
 
     var auth = (Authentication) request.getUserPrincipal();
     var user = (User) auth.getPrincipal();
-    return user.toCurrentUser();
+    return toCurrentUser(user);
   }
 
   @PostMapping("/logout")
@@ -42,7 +43,18 @@ public class AuthController {
   }
 
   @GetMapping("/current-user")
-  public Map<String, Object> current(@AuthenticationPrincipal User user) {
-    return user.toCurrentUser();
+  public CurrentUser current(@AuthenticationPrincipal User user) {
+    return toCurrentUser(user);
+  }
+
+  private CurrentUser toCurrentUser(User user) {
+    return new CurrentUser(user.getId(), user.getUsername());
+  }
+
+  @Value
+  public static class CurrentUser {
+    int id;
+    String username;
   }
 }
+

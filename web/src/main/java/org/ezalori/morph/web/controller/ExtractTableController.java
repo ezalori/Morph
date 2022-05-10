@@ -1,9 +1,11 @@
 package org.ezalori.morph.web.controller;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.Value;
 import org.ezalori.morph.common.model.ExtractTable;
 import org.ezalori.morph.common.repository.ExtractTableRepository;
 import org.ezalori.morph.common.service.ExtractTableService;
@@ -33,15 +35,15 @@ public class ExtractTableController {
   }
 
   @GetMapping("/get")
-  public Map<String, Object> get(@RequestParam("id") Integer id) {
+  public GetResponse get(@RequestParam("id") Integer id) {
     var table = tableRepo.findById(id).orElseThrow(() -> new AppException("Table ID not found."));
     var columns = tableService.getColumns(
         table.getSourceInstance(), table.getSourceDatabase(), table.getSourceTable());
-    return Map.of("table", table, "columns", columns);
+    return new GetResponse(table, columns);
   }
 
   @PostMapping("/save")
-  public Map<String, Object> save(@Valid ExtractTableForm tableForm, BindingResult bindingResult) {
+  public SaveResponse save(@Valid ExtractTableForm tableForm, BindingResult bindingResult) {
     FormUtils.checkBindingErrors(bindingResult);
 
     ExtractTable table;
@@ -54,7 +56,7 @@ public class ExtractTableController {
     }
     BeanUtils.copyProperties(tableForm, table);
     tableRepo.save(table);
-    return Map.of("id", table.getId());
+    return new SaveResponse(1);
   }
 
   @PostMapping("/delete")
@@ -72,5 +74,16 @@ public class ExtractTableController {
       @RequestParam("sourceTable") String sourceTable) {
     var columns = tableService.getColumns(sourceInstance, sourceDatabase, sourceTable);
     return Map.of("columns", columns);
+  }
+
+  @Value
+  public static class SaveResponse {
+    int id;
+  }
+
+  @Value
+  public static class GetResponse {
+    ExtractTable table;
+    List<String> columns;
   }
 }
